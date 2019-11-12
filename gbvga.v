@@ -1,5 +1,6 @@
 module gbvga(
 	input clk,
+	output pllclk_out,
 	output vsync,
 	output hsync,
 	output[1:0] r,
@@ -13,6 +14,8 @@ module gbvga(
 	
 	assign digit = 4'b0111;
 	assign segment = {~locked, 7'b1111111};
+	
+	assign pllclk_out = pllclk;
 	
 	pll pll_inst(
 		.inclk0(clk),
