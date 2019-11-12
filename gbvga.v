@@ -8,4 +8,15 @@ module gbvga(
 	output[7:0] segment,
 	output[3:0] digit);
 
+	wire pllclk;
+	wire locked;
+	
+	assign digit = 4'b0111;
+	assign segment = {~locked, 7'b1111111};
+	
+	pll pll_inst(
+		.inclk0(clk),
+		.c0(pllclk),
+		.locked(locked)
+	);
 endmodule
