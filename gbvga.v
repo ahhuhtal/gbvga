@@ -45,6 +45,14 @@ module gbvga(
 
 	reg[10:0] h_counter;
 	reg[9:0] v_counter;	
+
+	wire[14:0] data_address;
+	wire visible;
+	wire[1:0] data;
+	
+	assign data_address[14:0] = visible*(v_counter[9:2]*160 + h_counter[10:2]);
+	
+	assign data[1:0] = data_address[10:9];
 	
 	always @(posedge pllclk)
 	begin
@@ -69,4 +77,8 @@ module gbvga(
 	
 	assign hsync = (h_counter >= h_vis + h_fp && h_counter < h_vis + h_fp + h_sync);
 	assign vsync = (v_counter >= v_vis + v_fp && v_counter < v_vis + v_fp + v_sync);
+
+	assign visible = h_counter < h_vis && v_counter < v_vis;
+	
+	assign r[1:0] = data[1:0] & visible;
 endmodule
