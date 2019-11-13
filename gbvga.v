@@ -23,12 +23,32 @@ module gbvga(
 		.locked(locked)
 	);
 	
+	// regular 800x600 timings
+	// localparam h_vis = 800;
+	// localparam h_fp = 40;
+	// localparam h_sync = 128;
+	// localparam h_bp = 88;
+	// localparam v_vis = 600;
+	// localparam v_fp = 1;
+	// localparam v_sync = 4;
+	// localparam v_bp = 23;
+	
+	localparam h_vis = 640;
+	localparam h_fp = 120;
+	localparam h_sync = 128;
+	localparam h_bp = 168;
+
+	localparam v_vis = 576;
+	localparam v_fp = 13;
+	localparam v_sync = 4;
+	localparam v_bp = 35;
+
 	reg[10:0] h_counter;
-	reg[9:0] v_counter;
+	reg[9:0] v_counter;	
 	
 	always @(posedge pllclk)
 	begin
-		if(h_counter < 1055)
+		if(h_counter < h_vis + h_fp + h_sync + h_bp - 1)
 		begin
 			h_counter <= h_counter+1;
 		end
@@ -36,7 +56,7 @@ module gbvga(
 		begin
 			h_counter <= 0;
 			
-			if(v_counter < 627)
+			if(v_counter < v_vis + v_fp + v_sync + v_bp - 1)
 			begin
 				v_counter <= v_counter+1;
 			end
@@ -47,6 +67,6 @@ module gbvga(
 		end
 	end
 	
-	assign hsync = (h_counter >= 840 && h_counter < 968);
-	assign vsync = (v_counter >= 601 && v_counter < 605);
+	assign hsync = (h_counter >= h_vis + h_fp && h_counter < h_vis + h_fp + h_sync);
+	assign vsync = (v_counter >= v_vis + v_fp && v_counter < v_vis + v_fp + v_sync);
 endmodule
