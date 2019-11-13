@@ -62,7 +62,7 @@ module gbvga(
 		.q(data)
 	);
 	
-	always @(posedge pllclk)
+	always @(negedge pllclk)
 	begin
 		if(h_counter < h_vis + h_fp + h_sync + h_bp - 1)
 		begin
@@ -97,7 +97,7 @@ module gbvga(
 
 	assign hsync_next = (h_counter >= h_vis + h_fp && h_counter < h_vis + h_fp + h_sync);
 	assign vsync_next = (v_counter >= v_vis + v_fp && v_counter < v_vis + v_fp + v_sync);
-	assign r_next[1:0] = data[1:0] & visible;
-	assign g_next[1:0] = data[1:0] & visible;
-	assign b_next[1:0] = data[1:0] & visible;
+	assign r_next[1:0] = {data[1] & visible, data[0] & visible };
+	assign g_next[1:0] = {data[1] & visible, data[0] & visible };
+	assign b_next[1:0] = {data[1] & visible, data[0] & visible };
 endmodule
