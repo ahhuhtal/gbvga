@@ -115,11 +115,11 @@ module gbvga(
 		
 		// input handler
 
-		if(ivsync && ~ivsync_prev) begin
+		if(ivsync && !ivsync_prev) begin
 			ipixel <= 0;
 			iwrite_latched <= 1'b0;
 		end else begin
-			if(iclk && ~iclk_prev) begin
+			if(iclk && !iclk_prev) begin
 				ipixel <= ipixel+1;
 				ipixel_latched <= ipixel;
 				idata_latched <= idata;
