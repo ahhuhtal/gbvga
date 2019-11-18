@@ -1,11 +1,11 @@
 module gbvga(
 	input clk,
 	output pllclk_out,
-	output reg vsync,
-	output reg hsync,
-	output reg[1:0] r,
-	output reg[1:0] g,
-	output reg[1:0] b,
+	output vsync,
+	output hsync,
+	output[1:0] r,
+	output[1:0] g,
+	output[1:0] b,
 	input[1:0] di,
 	input hsynci,
 	input vsynci,
@@ -48,24 +48,36 @@ module gbvga(
 	localparam v_sync = 4;
 	localparam v_bp = 35;
 
-	reg[10:0] h_counter;
-	reg[9:0] v_counter;	
+	// horiz. counter at time k
+	reg[10:0] hcounter_k0;
+	// vert. counter at time k
+	reg[9:0] vcounter_k0;
+	// output pixel address at time k
+	wire[14:0] opixel_k0;
+	// output pixel visiblity at time k
+	wire visible_k0;
+	// horiz. sync signal at time k
+	wire hsync_k0;
+	// vert. sync signal at time k
+	wire vert_k0;
 	
-	wire[1:0] r_p2;
-	wire[1:0] g_p2;
-	wire[1:0] b_p2;
-	reg[1:0] r_p1;
-	reg[1:0] g_p1;
-	reg[1:0] b_p1;
-
-	wire hsync_p1;
-	wire vsync_p1;
-
-	wire[14:0] pixel_o;
-
-	wire[1:0] data_p2;
+	// output pixel data at time k-1
+	wire[1:0] data_k1;
+	// output pixel visiblity at time k-1
+	reg visible_k1;
+	// horiz. sync signal at time k-1
+	reg hsync_k1;
+	// vert. sync signal at time k-1
+	reg vsync_k1;
 	
-	wire visible;
+	// output pixel data at time k-2
+	reg[1:0] data_k2;
+	// output pixel visiblity at time k-2
+	reg visible_k2;
+	// horiz. sync signal at time k-2
+	reg hsync_k2;
+	// vert. sync signal at time k-2
+	reg vsync_k2;
 	
 	reg clki_prev;
 	reg vsynci_prev;
@@ -73,34 +85,33 @@ module gbvga(
 	reg[14:0] pixel_i;
 	
 	framebuffer framebuffer_inst(
-		.rdaddress(pixel_o),
+		.rdaddress(opixel_k0),
 		.wraddress(pixel_i),
 		.clock(pllclk),
-		.q(data_p2)
+		.q(data_k1)
 	);
 	
 	always @(posedge pllclk) begin
-		if(h_counter < h_vis + h_fp + h_sync + h_bp - 1) begin
-			h_counter <= h_counter+1;
+		if(hcounter_k0 < h_vis + h_fp + h_sync + h_bp - 1) begin
+			hcounter_k0 <= hcounter_k0+1;
 		end else begin
-			h_counter <= 0;
+			hcounter_k0 <= 0;
 			
-			if(v_counter < v_vis + v_fp + v_sync + v_bp - 1) begin
-				v_counter <= v_counter+1;
+			if(vcounter_k0 < v_vis + v_fp + v_sync + v_bp - 1) begin
+				vcounter_k0 <= vcounter_k0+1;
 			end else begin
-				v_counter <= 0;
+				vcounter_k0 <= 0;
 			end
 		end
-		
-		r_p1 <= r_p2;
-		g_p1 <= g_p2;
-		b_p1 <= b_p2;
 
-		vsync <= vsync_p1;
-		hsync <= hsync_p1;
-		r <= r_p1;
-		g <= g_p1;
-		b <= b_p1;
+		visible_k1 <= visible_k0;
+		vsync_k1 <= vsync_k0;
+		hsync_k1 <= hsync_k0;
+		
+		data_k2 <= data_k1;
+		visible_k2 <= visible_k1;
+		vsync_k2 <= vsync_k1;
+		hsync_k2 <= hsync_k1;
 		
 		if(vsynci && ~vsynci_prev) begin
 			pixel_i <= 0;
@@ -115,13 +126,15 @@ module gbvga(
 		hsynci_prev <= hsynci;
 	end
 	
-	assign visible = h_counter < h_vis && v_counter < v_vis;
-
-	assign pixel_o[14:0] = visible*(v_counter[9:2]*160 + h_counter[10:2]);
+	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
+	assign opixel_k0[14:0] = visible_k0*(vcounter_k0[9:2]*160 + hcounter_k0[10:2]);
 	
-	assign hsync_p2 = (h_counter >= h_vis + h_fp && h_counter < h_vis + h_fp + h_sync);
-	assign vsync_p2 = (v_counter >= v_vis + v_fp && v_counter < v_vis + v_fp + v_sync);
-	assign r_p2[1:0] = {data_p2[1] & visible, data_p2[0] & visible };
-	assign g_p2[1:0] = {data_p2[1] & visible, data_p2[0] & visible };
-	assign b_p2[1:0] = {data_p2[1] & visible, data_p2[0] & visible };
+	assign hsync_k0 = (hcounter_k0 >= h_vis + h_fp && hcounter_k0 < h_vis + h_fp + h_sync);
+	assign vsync_k0 = (vcounter_k0 >= v_vis + v_fp && vcounter_k0 < v_vis + v_fp + v_sync);
+
+	assign hsync = hsync_k2;
+	assign vsync = vsync_k2;
+	assign r[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
+	assign g[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
+	assign b[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
 endmodule
