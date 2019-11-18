@@ -1,30 +1,20 @@
 module gbvga(
 	input clk,
-	output pllclk_out,
 	output vsync,
 	output hsync,
 	output[1:0] r,
 	output[1:0] g,
 	output[1:0] b,
-	input[1:0] di,
-	input hsynci,
-	input vsynci,
-	input clki,
-	output[7:0] segment,
-	output[3:0] digit);
+	input[1:0] idata,
+	input ihsync,
+	input ivsync,
+	input iclk);
 
 	wire pllclk;
-	wire locked;
-	
-	assign digit = 4'b0111;
-	assign segment = {~locked, 7'b1111111};
-	
-	assign pllclk_out = pllclk;
 	
 	pll pll_inst(
 		.inclk0(clk),
-		.c0(pllclk),
-		.locked(locked)
+		.c0(pllclk)
 	);
 	
 	// regular 800x600 timings
@@ -79,19 +69,29 @@ module gbvga(
 	// vert. sync signal at time k-2
 	reg vsync_k2;
 	
-	reg clki_prev;
-	reg vsynci_prev;
-	reg hsynci_prev;
-	reg[14:0] pixel_i;
+	// memory for detecting edges
+	reg iclk_prev;
+	reg ivsync_prev;
+
+	reg[14:0] ipixel;
+	
+	reg[14:0] ipixel_latched;
+	reg[1:0] idata_latched;
+	reg iwrite_latched;
 	
 	framebuffer framebuffer_inst(
-		.rdaddress(opixel_k0),
-		.wraddress(pixel_i),
 		.clock(pllclk),
-		.q(data_k1)
+
+		.rdaddress(opixel_k0),
+		.q(data_k1),
+
+		.wraddress(ipixel_latched),
+		.data(idata_latched),
+		.wren(iwrite_latched)
 	);
 	
 	always @(posedge pllclk) begin
+		// output handler
 		if(hcounter_k0 < h_vis + h_fp + h_sync + h_bp - 1) begin
 			hcounter_k0 <= hcounter_k0+1;
 		end else begin
@@ -113,17 +113,24 @@ module gbvga(
 		vsync_k2 <= vsync_k1;
 		hsync_k2 <= hsync_k1;
 		
-		if(vsynci && ~vsynci_prev) begin
-			pixel_i <= 0;
+		// input handler
+
+		if(ivsync && ~ivsync_prev) begin
+			ipixel <= 0;
+			iwrite_latched <= 1'b0;
 		end else begin
-			if(clki && ~clki_prev) begin
-				pixel_i <= pixel_i+1;
+			if(iclk && ~iclk_prev) begin
+				ipixel <= ipixel+1;
+				ipixel_latched <= ipixel;
+				idata_latched <= idata;
+				iwrite_latched <= 1'b1;
+			end else begin
+				iwrite_latched <= 1'b0;
 			end
 		end
 		
-		clki_prev <= clki;
-		vsynci_prev <= vsynci;
-		hsynci_prev <= hsynci;
+		iclk_prev <= iclk;
+		ivsync_prev <= ivsync;
 	end
 	
 	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
