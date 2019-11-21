@@ -70,8 +70,12 @@ module gbvga(
 	reg vsync_k2;
 	
 	// memory for detecting edges
-	reg iclk_prev;
-	reg ivsync_prev;
+	reg iclk_prev1;
+	reg iclk_prev2;
+	reg iclk_prev3;
+	reg ivsync_prev1;
+	reg ivsync_prev2;
+	reg ivsync_prev3;
 
 	reg[14:0] ipixel;
 	
@@ -115,11 +119,11 @@ module gbvga(
 		
 		// input handler
 
-		if(ivsync && !ivsync_prev) begin
+		if(!ivsync_prev3 && ivsync_prev2 && ivsync_prev1 && ivsync) begin
 			ipixel <= 0;
 			iwrite_latched <= 1'b0;
 		end else begin
-			if(iclk && !iclk_prev) begin
+			if(!iclk_prev3 && iclk_prev2 && iclk_prev1 && iclk) begin
 				ipixel <= ipixel+1;
 				ipixel_latched <= ipixel;
 				idata_latched <= idata;
@@ -129,8 +133,12 @@ module gbvga(
 			end
 		end
 		
-		iclk_prev <= iclk;
-		ivsync_prev <= ivsync;
+		iclk_prev3 <= iclk_prev2;
+		iclk_prev2 <= iclk_prev1;
+		iclk_prev1 <= iclk;
+		ivsync_prev3 <= ivsync_prev2;
+		ivsync_prev2 <= ivsync_prev1;
+		ivsync_prev1 <= ivsync;
 	end
 	
 	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
@@ -141,7 +149,7 @@ module gbvga(
 
 	assign hsync = hsync_k2;
 	assign vsync = vsync_k2;
-	assign r[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
-	assign g[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
-	assign b[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
+	assign r[1:0] = {(~data_k2[1]) & visible_k2, (~data_k2[0]) & visible_k2 };
+	assign g[1:0] = {(~data_k2[1]) & visible_k2, (~data_k2[0]) & visible_k2 };
+	assign b[1:0] = {(~data_k2[1]) & visible_k2, (~data_k2[0]) & visible_k2 };
 endmodule
