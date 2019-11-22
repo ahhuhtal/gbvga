@@ -70,12 +70,13 @@ module gbvga(
 	reg vsync_k2;
 	
 	// memory for detecting edges
+	reg iclk_state;
 	reg iclk_prev1;
 	reg iclk_prev2;
-	reg iclk_prev3;
+
+	reg ivsync_state;
 	reg ivsync_prev1;
 	reg ivsync_prev2;
-	reg ivsync_prev3;
 
 	reg[14:0] ipixel;
 	
@@ -119,24 +120,38 @@ module gbvga(
 		
 		// input handler
 
-		if(!ivsync_prev3 && ivsync_prev2 && ivsync_prev1 && ivsync) begin
-			ipixel <= 0;
-			iwrite_latched <= 1'b0;
-		end else begin
-			if(!iclk_prev3 && iclk_prev2 && iclk_prev1 && iclk) begin
-				ipixel <= ipixel+1;
-				ipixel_latched <= ipixel;
-				idata_latched <= idata;
-				iwrite_latched <= 1'b1;
-			end else begin
-				iwrite_latched <= 1'b0;
-			end
+		// reset write latch
+		iwrite_latched <= 0;
+		
+		// if clock has been high for a while, change the clock state high
+		if(iclk_prev2 && iclk_prev1 && iclk && !iclk_state) begin
+			iclk_state <= 1;
+		end
+
+		// if the clock has been low for a while, change the clock state low
+		if(!iclk_prev2 && !iclk_prev1 && !iclk && iclk_state) begin
+			iclk_state <= 0;
+
+			ipixel <= ipixel+1;
+			ipixel_latched <= ipixel;
+			idata_latched <= idata;
+			iwrite_latched <= 1;
 		end
 		
-		iclk_prev3 <= iclk_prev2;
+		// if vsync has been high for a while, change the vsync state high
+		if(ivsync_prev2 && ivsync_prev1 && ivsync && !ivsync_state) begin
+			ivsync_state <= 1;
+
+			ipixel <= 0;
+		end
+
+		// if vsync has been low for a while, change the vsync state low
+		if(!ivsync_prev2 && !ivsync_prev1 && !ivsync && ivsync_state) begin
+			ivsync_state <= 0;
+		end
+
 		iclk_prev2 <= iclk_prev1;
 		iclk_prev1 <= iclk;
-		ivsync_prev3 <= ivsync_prev2;
 		ivsync_prev2 <= ivsync_prev1;
 		ivsync_prev1 <= ivsync;
 	end
