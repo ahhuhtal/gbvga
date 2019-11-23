@@ -17,7 +17,7 @@ module gbvga(
 		.c0(pllclk)
 	);
 	
-	// regular 800x600 timings
+	// regular 800x600 timings @ 40 MHz
 	// localparam h_vis = 800;
 	// localparam h_fp = 40;
 	// localparam h_sync = 128;
@@ -27,11 +27,22 @@ module gbvga(
 	// localparam v_sync = 4;
 	// localparam v_bp = 23;
 	
-	// params for 640x576 following 800x600 timings
-	localparam h_vis = 640;
-	localparam h_fp = 120;
-	localparam h_sync = 128;
-	localparam h_bp = 168;
+	// params for 640x576 following 800x600 timings @ 40 MHz
+	// localparam h_vis = 640;
+	// localparam h_fp = 120;
+	// localparam h_sync = 128;
+	// localparam h_bp = 168;
+
+	// localparam v_vis = 576;
+	// localparam v_fp = 13;
+	// localparam v_sync = 4;
+	// localparam v_bp = 35;
+
+	// params for 640x576 following 800x600 timings @ 20 MHz
+	localparam h_vis = 320;
+	localparam h_fp = 60;
+	localparam h_sync = 64;
+	localparam h_bp = 84;
 
 	localparam v_vis = 576;
 	localparam v_fp = 13;
@@ -39,7 +50,7 @@ module gbvga(
 	localparam v_bp = 35;
 
 	// horiz. counter at time k
-	reg[10:0] hcounter_k0;
+	reg[9:0] hcounter_k0;
 	// vert. counter at time k
 	reg[9:0] vcounter_k0;
 	// output pixel address at time k
@@ -71,12 +82,10 @@ module gbvga(
 	
 	// memory for detecting edges
 	reg iclk_state;
-	reg iclk_prev1;
-	reg iclk_prev2;
+	reg iclk_prev;
 
 	reg ivsync_state;
-	reg ivsync_prev1;
-	reg ivsync_prev2;
+	reg ivsync_prev;
 
 	reg[14:0] ipixel;
 	
@@ -124,12 +133,12 @@ module gbvga(
 		iwrite_latched <= 0;
 		
 		// if clock has been high for a while, change the clock state high
-		if(iclk_prev2 && iclk_prev1 && iclk && !iclk_state) begin
+		if(iclk_prev && iclk && !iclk_state) begin
 			iclk_state <= 1;
 		end
 
 		// if the clock has been low for a while, change the clock state low
-		if(!iclk_prev2 && !iclk_prev1 && !iclk && iclk_state) begin
+		if(!iclk_prev && !iclk && iclk_state) begin
 			iclk_state <= 0;
 
 			ipixel <= ipixel+1;
@@ -139,25 +148,23 @@ module gbvga(
 		end
 		
 		// if vsync has been high for a while, change the vsync state high
-		if(ivsync_prev2 && ivsync_prev1 && ivsync && !ivsync_state) begin
+		if(ivsync_prev && ivsync && !ivsync_state) begin
 			ivsync_state <= 1;
 
 			ipixel <= 0;
 		end
 
 		// if vsync has been low for a while, change the vsync state low
-		if(!ivsync_prev2 && !ivsync_prev1 && !ivsync && ivsync_state) begin
+		if(!ivsync_prev && !ivsync && ivsync_state) begin
 			ivsync_state <= 0;
 		end
 
-		iclk_prev2 <= iclk_prev1;
-		iclk_prev1 <= iclk;
-		ivsync_prev2 <= ivsync_prev1;
-		ivsync_prev1 <= ivsync;
+		iclk_prev <= iclk;
+		ivsync_prev <= ivsync;
 	end
 	
 	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
-	assign opixel_k0[14:0] = visible_k0*(vcounter_k0[9:2]*160 + hcounter_k0[10:2]);
+	assign opixel_k0[14:0] = visible_k0*(vcounter_k0[9:2]*160 + hcounter_k0[9:1]);
 	
 	assign hsync_k0 = (hcounter_k0 >= h_vis + h_fp && hcounter_k0 < h_vis + h_fp + h_sync);
 	assign vsync_k0 = (vcounter_k0 >= v_vis + v_fp && vcounter_k0 < v_vis + v_fp + v_sync);
