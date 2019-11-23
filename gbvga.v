@@ -134,7 +134,7 @@ module gbvga(
 
 			ipixel <= ipixel+1;
 			ipixel_latched <= ipixel;
-			idata_latched <= idata;
+			idata_latched <= ~idata;
 			iwrite_latched <= 1;
 		end
 		
@@ -164,7 +164,7 @@ module gbvga(
 
 	assign hsync = hsync_k2;
 	assign vsync = vsync_k2;
-	assign r[1:0] = {(~data_k2[1]) & visible_k2, (~data_k2[0]) & visible_k2 };
-	assign g[1:0] = {(~data_k2[1]) & visible_k2, (~data_k2[0]) & visible_k2 };
-	assign b[1:0] = {(~data_k2[1]) & visible_k2, (~data_k2[0]) & visible_k2 };
+	assign r[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
+	assign g[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
+	assign b[1:0] = {data_k2[1] & visible_k2, data_k2[0] & visible_k2 };
 endmodule
