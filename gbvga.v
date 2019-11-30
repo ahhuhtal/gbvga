@@ -28,21 +28,10 @@ module gbvga(
 	// localparam v_bp = 23;
 	
 	// params for 640x576 following 800x600 timings @ 40 MHz
-	// localparam h_vis = 640;
-	// localparam h_fp = 120;
-	// localparam h_sync = 128;
-	// localparam h_bp = 168;
-
-	// localparam v_vis = 576;
-	// localparam v_fp = 13;
-	// localparam v_sync = 4;
-	// localparam v_bp = 35;
-
-	// params for 640x576 following 800x600 timings @ 20 MHz
-	localparam h_vis = 320;
-	localparam h_fp = 60;
-	localparam h_sync = 64;
-	localparam h_bp = 84;
+	localparam h_vis = 640;
+	localparam h_fp = 120;
+	localparam h_sync = 128;
+	localparam h_bp = 168;
 
 	localparam v_vis = 576;
 	localparam v_fp = 13;
@@ -50,7 +39,7 @@ module gbvga(
 	localparam v_bp = 35;
 
 	// horiz. counter at time k
-	reg[9:0] hcounter_k0;
+	reg[10:0] hcounter_k0;
 	// vert. counter at time k
 	reg[9:0] vcounter_k0;
 	// output pixel address at time k
@@ -141,10 +130,13 @@ module gbvga(
 		if(!iclk_prev && !iclk && iclk_state) begin
 			iclk_state <= 0;
 
-			ipixel <= ipixel+1;
-			ipixel_latched <= ipixel;
-			idata_latched <= ~idata;
-			iwrite_latched <= 1;
+			// also, if the hsync is low, sample the data lines and store to memory
+			if(ihsync_state == 0) begin
+				ipixel <= ipixel+1;
+				ipixel_latched <= ipixel;
+				idata_latched <= ~idata;
+				iwrite_latched <= 1;
+			end
 		end
 		
 		// if vsync has been high for a while, change the vsync state high
@@ -164,7 +156,7 @@ module gbvga(
 	end
 	
 	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
-	assign opixel_k0[14:0] = visible_k0*(vcounter_k0[9:2]*160 + hcounter_k0[9:1]);
+	assign opixel_k0[14:0] = visible_k0*(vcounter_k0[9:2]*160 + hcounter_k0[10:2]);
 	
 	assign hsync_k0 = (hcounter_k0 >= h_vis + h_fp && hcounter_k0 < h_vis + h_fp + h_sync);
 	assign vsync_k0 = (vcounter_k0 >= v_vis + v_fp && vcounter_k0 < v_vis + v_fp + v_sync);
