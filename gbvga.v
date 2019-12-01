@@ -76,6 +76,9 @@ module gbvga(
 	reg ivsync_state;
 	reg ivsync_prev;
 
+	reg ihsync_state;
+	reg ihsync_prev;
+	
 	reg[14:0] ipixel;
 	
 	reg[14:0] ipixel_latched;
@@ -153,6 +156,7 @@ module gbvga(
 
 		iclk_prev <= iclk;
 		ivsync_prev <= ivsync;
+		ihsync_prev <= ihsync;
 	end
 	
 	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
