@@ -69,22 +69,28 @@ module gbvga(
 	// vert. sync signal at time k-2
 	reg vsync_k2;
 	
-	// memory for detecting edges
+	// memory for filtered edge detection
 	reg iclk_state;
 	reg iclk_prev1;
 	reg iclk_prev2;
-
+	reg iclk_prev3;
+	
 	reg ivsync_state;
 	reg ivsync_prev1;
 	reg ivsync_prev2;
-
+	reg ivsync_prev3;
+	
 	reg ihsync_state;
 	reg ihsync_prev1;
 	reg ihsync_prev2;
+	reg ihsync_prev3;
 	
-	// memory for synchronizing data at edge detect
+	// memory for synchronizing data to a moment before edge detect
 	reg[1:0] idata_prev1;
 	reg[1:0] idata_prev2;
+	reg[1:0] idata_prev3;
+	reg[1:0] idata_prev4;
+	reg[1:0] idata_prev5;
 	
 	reg[14:0] ipixel;
 	
@@ -132,48 +138,48 @@ module gbvga(
 		iwrite_latched <= 0;
 		
 		// if clock has been high for a while, change the clock state high
-		if(iclk_prev2 && iclk_prev1 && iclk && !iclk_state) begin
+		if(iclk_prev3 && iclk_prev2 && iclk_prev1 && iclk && !iclk_state) begin
 			iclk_state <= 1;
 		end
 
 		// if the clock has been low for a while, change the clock state low
-		if(!iclk_prev2 && !iclk_prev1 && !iclk && iclk_state) begin
+		if(!iclk_prev3 && !iclk_prev2 && !iclk_prev1 && !iclk && iclk_state) begin
 			iclk_state <= 0;
 
 			// also, if the hsync is low, sample the data lines and store to memory
 			if(ihsync_state == 0) begin
 				ipixel <= ipixel+1;
 				ipixel_latched <= ipixel;
-				idata_latched <= ~idata_prev2;
+				idata_latched <= ~idata_prev5;
 				iwrite_latched <= 1;
 			end
 		end
 		
 		// if hsync has been low for a while, change the hsync state low
-		if(!ihsync_prev2 && !ihsync_prev1 && !ihsync && ihsync_state) begin
+		if(!ihsync_prev3 && !ihsync_prev2 && !ihsync_prev1 && !ihsync && ihsync_state) begin
 			ihsync_state <= 0;
 
 			// sample pixel
 			ipixel <= ipixel+1;
 			ipixel_latched <= ipixel;
-			idata_latched <= ~idata_prev2;
+			idata_latched <= ~idata_prev5;
 			iwrite_latched <= 1;
 		end
 
 		// if hsync has been high for a while, change the hsync state high
-		if(ihsync_prev2 && ihsync_prev1 && ihsync && !ihsync_state) begin
+		if(ihsync_prev3 && ihsync_prev2 && ihsync_prev1 && ihsync && !ihsync_state) begin
 			ihsync_state <= 1;
 		end
 
 		// if vsync has been high for a while, change the vsync state high
-		if(ivsync_prev2 && ivsync_prev1 && ivsync && !ivsync_state) begin
+		if(ivsync_prev3 && ivsync_prev2 && ivsync_prev1 && ivsync && !ivsync_state) begin
 			ivsync_state <= 1;
 
 			ipixel <= 0;
 		end
 
 		// if vsync has been low for a while, change the vsync state low
-		if(!ivsync_prev2 && !ivsync_prev1 && !ivsync && ivsync_state) begin
+		if(!ivsync_prev3 && !ivsync_prev2 && !ivsync_prev1 && !ivsync && ivsync_state) begin
 			ivsync_state <= 0;
 		end
 
@@ -186,6 +192,14 @@ module gbvga(
 		ivsync_prev2 <= ivsync_prev1;
 		ihsync_prev2 <= ihsync_prev1;
 		idata_prev2 <= idata_prev1;
+		
+		iclk_prev3 <= iclk_prev2;
+		ivsync_prev3 <= ivsync_prev2;
+		ihsync_prev3 <= ihsync_prev2;
+		idata_prev3 <= idata_prev2;
+		
+		idata_prev4 <= idata_prev3;
+		idata_prev5 <= idata_prev4;
 	end
 	
 	assign visible_k0 = hcounter_k0 < h_vis && vcounter_k0 < v_vis;
