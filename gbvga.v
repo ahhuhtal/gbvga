@@ -50,7 +50,7 @@ module gbvga(
 	// horiz. sync signal
 	wire hsync_next2;
 	// vert. sync signal
-	wire vert_next2;
+	wire vsync_next2;
 	
 
 	// VGA output for next pixel
@@ -140,7 +140,7 @@ module gbvga(
 		if(hcounter_next2 < h_vis + h_fp + h_sync + h_bp - 1) begin
 			// the increment doesn't overflow horizontal pixel count
 			
-			hcounter_next2 <= hcounter_next2+1; // increment the horizontal pixel position
+			hcounter_next2 <= hcounter_next2+1'd1; // increment the horizontal pixel position
 		end else begin
 			// the increment would overflow pixel count
 			hcounter_next2 <= 0; // reset horizontal pixel position
@@ -148,7 +148,7 @@ module gbvga(
 			if(vcounter_next2 < v_vis + v_fp + v_sync + v_bp - 1) begin
 				// the increment doesn't overflow vertical pixel count
 
-				vcounter_next2 <= vcounter_next2+1; // increment the vertical pixel position
+				vcounter_next2 <= vcounter_next2+1'd1; // increment the vertical pixel position
 			end else begin
 				// the increment would overflow pixel count
 				vcounter_next2 <= 0; // reset vertical pixel position
@@ -190,7 +190,7 @@ module gbvga(
 
 			// also, if the hsync is low, sample the data lines and store to memory
 			if(ihsync_state == 0) begin
-				ipixel <= ipixel+1; // increment pixel count
+				ipixel <= ipixel+1'd1; // increment pixel count
 				
 				// store the current pixel address as write address
 				// take data from a few clock cycles ago
@@ -213,7 +213,7 @@ module gbvga(
 		if(!ihsync_prev3 && !ihsync_prev2 && !ihsync_prev1 && !ihsync && ihsync_state) begin
 			ihsync_state <= 0;
 
-			ipixel <= ipixel+1; // increment pixel count
+			ipixel <= ipixel+1'd1; // increment pixel count
 
 			// store the current pixel address
 			// take data from a few clock cycles ago
@@ -272,7 +272,7 @@ module gbvga(
 	// compute the address in framebuffer for the pixel after 2 clock cycles
 	// if pixel is not visible, default to address 0
 	// otherwise address = vcount/4 * 160 + hcount/4
-	assign opixel_next2[14:0] = visible_next2*(vcounter_next2[9:2]*160 + hcounter_next2[10:2]);
+	assign opixel_next2[14:0] = visible_next2*(vcounter_next2[9:2]*8'd160 + hcounter_next2[10:2]);
 	
 	// compute hsync and vsync signals for the pixel after 2 clock cycles
 	// polarity is positive for the svga 800x600
