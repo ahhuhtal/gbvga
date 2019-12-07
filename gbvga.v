@@ -2,9 +2,9 @@ module gbvga(
 	input clk,
 	output vsync,
 	output hsync,
-	output[1:0] r,
-	output[1:0] g,
-	output[1:0] b,
+	output reg[1:0] r,
+	output reg[1:0] g,
+	output reg[1:0] b,
 	input[1:0] idata,
 	input ihsync,
 	input ivsync,
@@ -76,7 +76,15 @@ module gbvga(
 	// vert. sync signal
 	reg vsync_now;
 	
-	
+	// how many VGA frames (vsync) without GB data to blank display
+	localparam framesmissing_to_blank = 2;
+
+	// flag to blank screen due to GB data missing
+	reg blank;
+
+	// how many VGA frames have been output without GB input
+	reg[1:0] framesmissing;
+
 	// GB data decoding variables
 
 	// memory for filtered edge detection
@@ -152,6 +160,14 @@ module gbvga(
 			end else begin
 				// the increment would overflow pixel count
 				vcounter_next2 <= 0; // reset vertical pixel position
+
+				// there have been framesmissing_to_blank frames without GB data
+				// and blank has not been set
+				if(blank == 0 && framesmissing >= framesmissing_to_blank) begin
+					blank <= 1;
+				end
+
+				framesmissing <= framesmissing + 2'd1;
 			end
 		end
 
@@ -232,6 +248,10 @@ module gbvga(
 
 			// rising edge of vsync signals a start of a new frame
 			ipixel <= 0;
+
+			// clear blank flag and data missing counter
+			blank <= 0;
+			framesmissing <= 0;
 		end
 
 		// if vsync has been low for a while, change the vsync state low
@@ -284,9 +304,27 @@ module gbvga(
 	assign vsync = vsync_now;
 	
 	// assign actual output pixel data
-	// all values are filled with the same data
-	// blank output if pixel is not visible
-	assign r[1:0] = {data_now[1] & visible_now, data_now[0] & visible_now };
-	assign g[1:0] = {data_now[1] & visible_now, data_now[0] & visible_now };
-	assign b[1:0] = {data_now[1] & visible_now, data_now[0] & visible_now };
+
+	always @* begin
+		if(visible_now) begin
+			// VGA output is not in blanking. Output data.
+
+			if(!blank) begin
+				// There is valid GB data. Display framebuffer contents
+				r <= data_now;
+				g <= data_now;
+				b <= data_now;
+			end else begin
+				// There is no valid GB data. Display white output.
+				r <= 2'b11;
+				g <= 2'b11;
+				b <= 2'b11;
+			end
+		end else begin
+			// VGA output is in blanking. Display black.
+			r <= 2'b00;
+			g <= 2'b00;
+			b <= 2'b00;
+		end
+	end
 endmodule
