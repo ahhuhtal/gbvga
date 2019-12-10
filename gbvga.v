@@ -137,7 +137,8 @@ module gbvga(
 	framebuffer framebuffer_inst (
 		.clock(pllclk), // a single clock is used for both ports
 		.address_a(opixel_next2), // port A used by VGA output
-		.wren_a(0), // VGA output does not write
+        .data_a(4'b1111), // write white data if display is blanked
+		.wren_a(blank), // VGA output does not write
 		.q_a(data_next1), // VGA output data
 
 		.address_b(ipixel_latched),
@@ -404,17 +405,10 @@ module gbvga(
 		if(visible_now) begin
 			// VGA output is not in blanking. Output data.
 
-			if(!blank) begin
-				// There is valid GB data. Display framebuffer contents
-				r <= data_now[3:2];
-				g <= data_now[3:2];
-				b <= data_now[3:2];
-			end else begin
-				// There is no valid GB data. Display white output.
-				r <= 2'b11;
-				g <= 2'b11;
-				b <= 2'b11;
-			end
+			// There is valid GB data. Display framebuffer contents
+			r <= data_now[3:2];
+			g <= data_now[3:2];
+			b <= data_now[3:2];
 		end else begin
 			// VGA output is in blanking. Display black.
 			r <= 2'b00;
