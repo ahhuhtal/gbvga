@@ -25,14 +25,14 @@ module gbvga(
 	
 	// VGA output variables
 	
-	// params for 640x576 following 800x600 timings @ 40 MHz
+	// params for 640x288 following 800x600 timings @ 40 MHz
 	localparam h_vis = 640; // visible area horizontal pixels
 	localparam h_fp = 120; // horizontal front porch pixels
 	localparam h_sync = 128; // horizontal sync active pixels
 	localparam h_bp = 168; // horizontal back porch pixels
 
-	localparam v_vis = 576; // visible area vertical pixels
-	localparam v_fp = 13; // vertical front porch pixels
+	localparam v_vis = 288; // visible area vertical pixels
+	localparam v_fp = 301; // vertical front porch pixels
 	localparam v_sync = 4; // vertical sync active pixels
 	localparam v_bp = 35; // vertical back porch pixels
 
@@ -56,7 +56,7 @@ module gbvga(
 	// VGA output for next pixel
 
 	// output pixel data
-	wire[1:0] data_next1;
+	wire[3:0] data_next1;
 	// output pixel visiblity
 	reg visible_next1;
 	// horiz. sync signal
@@ -68,7 +68,7 @@ module gbvga(
 	// VGA output for right now
 	
 	// output pixel data
-	reg[1:0] data_now;
+	reg[3:0] data_now;
 	// output pixel visiblity
 	reg visible_now;
 	// horiz. sync signal
@@ -124,24 +124,28 @@ module gbvga(
 	// these variables contain the address and value for duration of the write cycle
 	reg[14:0] ipixel_latched;
 	reg[1:0] idata_latched;
-	reg iwrite_latched;
+	wire[3:0] idata_oldstate;
+	reg[3:0] idata_newstate;
+	
+	reg iwrite_enabled;
+	
+	reg[2:0] iwrite_state;
 	
 
 	// 2-port RAM instantiation for framebuffer
 
-	framebuffer framebuffer_inst(
-		.clock(pllclk), // a single clock is used for both read and write
+	framebuffer framebuffer_inst (
+		.clock(pllclk), // a single clock is used for both ports
+		.address_a(opixel_next2), // port A used by VGA output
+		.wren_a(0), // VGA output does not write
+		.q_a(data_next1), // VGA output data
 
-		// start a read from the address marked for two clock cycles in the future
-		.rdaddress(opixel_next2), // read address
-		// when the read completes the data corresponds to one clock cycle in the future
-		.q(data_next1), // read data
-
-		.wren(iwrite_latched), // write enable
-		.wraddress(ipixel_latched), // which address to write to
-		.data(idata_latched) // data to write
+		.address_b(ipixel_latched),
+		.data_b(idata_newstate),
+		.wren_b(iwrite_enabled),
+		.q_b(idata_oldstate)
 	);
-	
+		
 	always @(posedge pllclk) begin
 		// VGA signal generation
 		
@@ -188,11 +192,105 @@ module gbvga(
 
 		// GB input decoder
 
-		// reset write latch
-		// that is, by default we don't want to continue writing
-		iwrite_latched <= 0;
+		case(iwrite_state)
+			0: begin // no update cycle was ongoing
+				iwrite_state <= 0;
+				iwrite_enabled <= 0;
+			end
 
-
+			1: begin // start read
+				iwrite_state <= 2;
+				iwrite_enabled <= 0;
+			end
+			
+			2: begin // old pixel state was read
+				case({idata_oldstate, idata_latched})
+					6'b000000: idata_newstate <= 4'b0000;
+					6'b000001: idata_newstate <= 4'b0001;
+					6'b000010: idata_newstate <= 4'b0010;
+					6'b000011: idata_newstate <= 4'b0011;
+					6'b000100: idata_newstate <= 4'b0000;
+					6'b000101: idata_newstate <= 4'b0010;
+					6'b000110: idata_newstate <= 4'b0011;
+					6'b000111: idata_newstate <= 4'b0100;
+					6'b001000: idata_newstate <= 4'b0001;
+					6'b001001: idata_newstate <= 4'b0011;
+					6'b001010: idata_newstate <= 4'b0100;
+					6'b001011: idata_newstate <= 4'b0101;
+					6'b001100: idata_newstate <= 4'b0010;
+					6'b001101: idata_newstate <= 4'b0100;
+					6'b001110: idata_newstate <= 4'b0101;
+					6'b001111: idata_newstate <= 4'b0110;
+					6'b010000: idata_newstate <= 4'b0011;
+					6'b010001: idata_newstate <= 4'b0101;
+					6'b010010: idata_newstate <= 4'b0101;
+					6'b010011: idata_newstate <= 4'b0110;
+					6'b010100: idata_newstate <= 4'b0100;
+					6'b010101: idata_newstate <= 4'b0101;
+					6'b010110: idata_newstate <= 4'b0110;
+					6'b010111: idata_newstate <= 4'b0111;
+					6'b011000: idata_newstate <= 4'b0101;
+					6'b011001: idata_newstate <= 4'b0101;
+					6'b011010: idata_newstate <= 4'b0111;
+					6'b011011: idata_newstate <= 4'b1000;
+					6'b011100: idata_newstate <= 4'b0101;
+					6'b011101: idata_newstate <= 4'b0110;
+					6'b011110: idata_newstate <= 4'b1000;
+					6'b011111: idata_newstate <= 4'b1001;
+					6'b100000: idata_newstate <= 4'b0110;
+					6'b100001: idata_newstate <= 4'b0111;
+					6'b100010: idata_newstate <= 4'b1001;
+					6'b100011: idata_newstate <= 4'b1010;
+					6'b100100: idata_newstate <= 4'b0111;
+					6'b100101: idata_newstate <= 4'b1000;
+					6'b100110: idata_newstate <= 4'b1010;
+					6'b100111: idata_newstate <= 4'b1010;
+					6'b101000: idata_newstate <= 4'b1000;
+					6'b101001: idata_newstate <= 4'b1001;
+					6'b101010: idata_newstate <= 4'b1010;
+					6'b101011: idata_newstate <= 4'b1011;
+					6'b101100: idata_newstate <= 4'b1001;
+					6'b101101: idata_newstate <= 4'b1010;
+					6'b101110: idata_newstate <= 4'b1010;
+					6'b101111: idata_newstate <= 4'b1100;
+					6'b110000: idata_newstate <= 4'b1001;
+					6'b110001: idata_newstate <= 4'b1010;
+					6'b110010: idata_newstate <= 4'b1011;
+					6'b110011: idata_newstate <= 4'b1101;
+					6'b110100: idata_newstate <= 4'b1010;
+					6'b110101: idata_newstate <= 4'b1011;
+					6'b110110: idata_newstate <= 4'b1100;
+					6'b110111: idata_newstate <= 4'b1110;
+					6'b111000: idata_newstate <= 4'b1011;
+					6'b111001: idata_newstate <= 4'b1100;
+					6'b111010: idata_newstate <= 4'b1101;
+					6'b111011: idata_newstate <= 4'b1111;
+					6'b111100: idata_newstate <= 4'b1100;
+					6'b111101: idata_newstate <= 4'b1101;
+					6'b111110: idata_newstate <= 4'b1110;
+					6'b111111: idata_newstate <= 4'b1111;
+				endcase
+				
+				iwrite_state <= 3;
+				iwrite_enabled <= 0;
+			end
+			
+			3: begin // new value is computed
+				iwrite_state <= 4;
+				iwrite_enabled <= 1;
+			end
+			
+			4: begin // write completed
+				iwrite_state <= 0;
+				iwrite_enabled <= 0;
+			end
+			
+			default: begin
+				iwrite_state <= 0;
+				iwrite_enabled <= 0;
+			end
+		endcase
+		
 		// input clock filtering and handling
 
 		// if clock has been high for a while, change the clock state high
@@ -208,12 +306,14 @@ module gbvga(
 			if(ihsync_state == 0) begin
 				ipixel <= ipixel+1'd1; // increment pixel count
 				
-				// store the current pixel address as write address
-				// take data from a few clock cycles ago
-				// initiate write
-				ipixel_latched <= ipixel;
-				idata_latched <= ~idata_prev5;
-				iwrite_latched <= 1;
+				if(ipixel < 11520) begin // only 11520 pixels of memory
+					// store the current pixel address as write address
+					// take data from a few clock cycles ago
+					// initiate write
+					ipixel_latched <= ipixel;
+					idata_latched <= ~idata_prev5;
+					iwrite_state <= 1;
+				end
 			end
 		end
 
@@ -231,12 +331,14 @@ module gbvga(
 
 			ipixel <= ipixel+1'd1; // increment pixel count
 
-			// store the current pixel address
-			// take data from a few clock cycles ago
-			// initiate write
-			ipixel_latched <= ipixel;
-			idata_latched <= ~idata_prev5;
-			iwrite_latched <= 1;
+			if(ipixel < 11520) begin // only 11520 pixels of memory
+				// store the current pixel address
+				// take data from a few clock cycles ago
+				// initiate write
+				ipixel_latched <= ipixel;
+				idata_latched <= ~idata_prev5;
+				iwrite_state <= 1;
+			end
 		end
 
 
@@ -311,9 +413,9 @@ module gbvga(
 
 			if(!blank) begin
 				// There is valid GB data. Display framebuffer contents
-				r <= data_now;
-				g <= data_now;
-				b <= data_now;
+				r <= data_now[3:2];
+				g <= data_now[3:2];
+				b <= data_now[3:2];
 			end else begin
 				// There is no valid GB data. Display white output.
 				r <= 2'b11;
