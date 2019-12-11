@@ -230,14 +230,12 @@ module gbvga(
 			if(ihsync_state == 0) begin
 				ipixel <= ipixel+1'd1; // increment pixel count
 				
-				if(ipixel[0] == 0) begin // store every other pixel, as there isn't enough memory for every pixel
-					// store the current pixel address as write address
-					// take data from a few clock cycles ago
-					// initiate write
-					ipixel_latched <= ipixel[14:1];
-					idata_latched <= ~idata_prev5;
-					iwrite_state <= 1;
-				end
+				// store the current pixel address as write address
+				// take data from a few clock cycles ago
+				// initiate write
+				ipixel_latched <= ipixel;
+				idata_latched <= ~idata_prev5;
+				iwrite_state <= 1;
 			end
 		end
 
@@ -255,14 +253,12 @@ module gbvga(
 
 			ipixel <= ipixel+1'd1; // increment pixel count
 
-			if(ipixel[0] == 0) begin // store every other pixel, as there isn't enough memory for every pixel
-				// store the current pixel address
-				// take data from a few clock cycles ago
-				// initiate write
-				ipixel_latched <= ipixel[14:1];
-				idata_latched <= ~idata_prev5;
-				iwrite_state <= 1;
-			end
+			// store the current pixel address
+			// take data from a few clock cycles ago
+			// initiate write
+			ipixel_latched <= ipixel;
+			idata_latched <= ~idata_prev5;
+			iwrite_state <= 1;
 		end
 
 
@@ -388,7 +384,7 @@ module gbvga(
 	// compute the address in framebuffer for the pixel after 2 clock cycles
 	// if pixel is not visible, default to address 0
 	// otherwise address = vcount/4 * 160 + hcount/4
-	assign opixel_next2[14:0] = visible_next2*(vcounter_next2[9:2]*8'd80 + hcounter_next2[10:3]);
+	assign opixel_next2[14:0] = visible_next2*(vcounter_next2[9:2]*8'd160 + hcounter_next2[10:2]);
 	
 	// compute hsync and vsync signals for the pixel after 2 clock cycles
 	// polarity is positive for the svga 800x600
