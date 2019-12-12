@@ -309,70 +309,70 @@ module gbvga(
     // compute motion blur
     always @* begin
 	    case({idata_oldstate, idata_latched})
-            6'b000000: idata_newstate <= 4'b0000;
-            6'b000001: idata_newstate <= 4'b0010;
-            6'b000010: idata_newstate <= 4'b0011;
-            6'b000011: idata_newstate <= 4'b0101;
-            6'b000100: idata_newstate <= 4'b0000;
-            6'b000101: idata_newstate <= 4'b0010;
-            6'b000110: idata_newstate <= 4'b0100;
-            6'b000111: idata_newstate <= 4'b0110;
-            6'b001000: idata_newstate <= 4'b0001;
-            6'b001001: idata_newstate <= 4'b0011;
-            6'b001010: idata_newstate <= 4'b0101;
-            6'b001011: idata_newstate <= 4'b0110;
-            6'b001100: idata_newstate <= 4'b0010;
-            6'b001101: idata_newstate <= 4'b0100;
-            6'b001110: idata_newstate <= 4'b0101;
-            6'b001111: idata_newstate <= 4'b0111;
-            6'b010000: idata_newstate <= 4'b0011;
-            6'b010001: idata_newstate <= 4'b0101;
-            6'b010010: idata_newstate <= 4'b0110;
-            6'b010011: idata_newstate <= 4'b1000;
-            6'b010100: idata_newstate <= 4'b0011;
-            6'b010101: idata_newstate <= 4'b0101;
-            6'b010110: idata_newstate <= 4'b0111;
-            6'b010111: idata_newstate <= 4'b1000;
-            6'b011000: idata_newstate <= 4'b0100;
-            6'b011001: idata_newstate <= 4'b0101;
-            6'b011010: idata_newstate <= 4'b0111;
-            6'b011011: idata_newstate <= 4'b1001;
-            6'b011100: idata_newstate <= 4'b0101;
-            6'b011101: idata_newstate <= 4'b0110;
-            6'b011110: idata_newstate <= 4'b1000;
-            6'b011111: idata_newstate <= 4'b1010;
-            6'b100000: idata_newstate <= 4'b0101;
-            6'b100001: idata_newstate <= 4'b0111;
-            6'b100010: idata_newstate <= 4'b1001;
-            6'b100011: idata_newstate <= 4'b1010;
-            6'b100100: idata_newstate <= 4'b0110;
-            6'b100101: idata_newstate <= 4'b1000;
-            6'b100110: idata_newstate <= 4'b1010;
-            6'b100111: idata_newstate <= 4'b1011;
-            6'b101000: idata_newstate <= 4'b0111;
-            6'b101001: idata_newstate <= 4'b1000;
-            6'b101010: idata_newstate <= 4'b1010;
-            6'b101011: idata_newstate <= 4'b1100;
-            6'b101100: idata_newstate <= 4'b0111;
-            6'b101101: idata_newstate <= 4'b1001;
-            6'b101110: idata_newstate <= 4'b1010;
-            6'b101111: idata_newstate <= 4'b1100;
-            6'b110000: idata_newstate <= 4'b1000;
-            6'b110001: idata_newstate <= 4'b1010;
-            6'b110010: idata_newstate <= 4'b1011;
-            6'b110011: idata_newstate <= 4'b1101;
-            6'b110100: idata_newstate <= 4'b1001;
-            6'b110101: idata_newstate <= 4'b1010;
-            6'b110110: idata_newstate <= 4'b1100;
-            6'b110111: idata_newstate <= 4'b1110;
-            6'b111000: idata_newstate <= 4'b1001;
-            6'b111001: idata_newstate <= 4'b1011;
-            6'b111010: idata_newstate <= 4'b1101;
-            6'b111011: idata_newstate <= 4'b1111;
-            6'b111100: idata_newstate <= 4'b1010;
-            6'b111101: idata_newstate <= 4'b1100;
-            6'b111110: idata_newstate <= 4'b1101;
-            6'b111111: idata_newstate <= 4'b1111;
+			6'b000000: idata_newstate <= 4'b0000;
+			6'b000001: idata_newstate <= 4'b0001;
+			6'b000010: idata_newstate <= 4'b0010;
+			6'b000011: idata_newstate <= 4'b0011;
+			6'b000100: idata_newstate <= 4'b0000;
+			6'b000101: idata_newstate <= 4'b0010;
+			6'b000110: idata_newstate <= 4'b0011;
+			6'b000111: idata_newstate <= 4'b0100;
+			6'b001000: idata_newstate <= 4'b0001;
+			6'b001001: idata_newstate <= 4'b0011;
+			6'b001010: idata_newstate <= 4'b0100;
+			6'b001011: idata_newstate <= 4'b0101;
+			6'b001100: idata_newstate <= 4'b0010;
+			6'b001101: idata_newstate <= 4'b0100;
+			6'b001110: idata_newstate <= 4'b0100;
+			6'b001111: idata_newstate <= 4'b0101;
+			6'b010000: idata_newstate <= 4'b0011;
+			6'b010001: idata_newstate <= 4'b0101;
+			6'b010010: idata_newstate <= 4'b0101;
+			6'b010011: idata_newstate <= 4'b0110;
+			6'b010100: idata_newstate <= 4'b0100;
+			6'b010101: idata_newstate <= 4'b0101;
+			6'b010110: idata_newstate <= 4'b0110;
+			6'b010111: idata_newstate <= 4'b0111;
+			6'b011000: idata_newstate <= 4'b0101;
+			6'b011001: idata_newstate <= 4'b0101;
+			6'b011010: idata_newstate <= 4'b0111;
+			6'b011011: idata_newstate <= 4'b1000;
+			6'b011100: idata_newstate <= 4'b0110;
+			6'b011101: idata_newstate <= 4'b0110;
+			6'b011110: idata_newstate <= 4'b1000;
+			6'b011111: idata_newstate <= 4'b1001;
+			6'b100000: idata_newstate <= 4'b0110;
+			6'b100001: idata_newstate <= 4'b0111;
+			6'b100010: idata_newstate <= 4'b1001;
+			6'b100011: idata_newstate <= 4'b1001;
+			6'b100100: idata_newstate <= 4'b0111;
+			6'b100101: idata_newstate <= 4'b1000;
+			6'b100110: idata_newstate <= 4'b1010;
+			6'b100111: idata_newstate <= 4'b1010;
+			6'b101000: idata_newstate <= 4'b1000;
+			6'b101001: idata_newstate <= 4'b1001;
+			6'b101010: idata_newstate <= 4'b1010;
+			6'b101011: idata_newstate <= 4'b1011;
+			6'b101100: idata_newstate <= 4'b1001;
+			6'b101101: idata_newstate <= 4'b1010;
+			6'b101110: idata_newstate <= 4'b1010;
+			6'b101111: idata_newstate <= 4'b1100;
+			6'b110000: idata_newstate <= 4'b1010;
+			6'b110001: idata_newstate <= 4'b1011;
+			6'b110010: idata_newstate <= 4'b1011;
+			6'b110011: idata_newstate <= 4'b1101;
+			6'b110100: idata_newstate <= 4'b1010;
+			6'b110101: idata_newstate <= 4'b1011;
+			6'b110110: idata_newstate <= 4'b1100;
+			6'b110111: idata_newstate <= 4'b1110;
+			6'b111000: idata_newstate <= 4'b1011;
+			6'b111001: idata_newstate <= 4'b1100;
+			6'b111010: idata_newstate <= 4'b1101;
+			6'b111011: idata_newstate <= 4'b1111;
+			6'b111100: idata_newstate <= 4'b1100;
+			6'b111101: idata_newstate <= 4'b1101;
+			6'b111110: idata_newstate <= 4'b1110;
+			6'b111111: idata_newstate <= 4'b1111;
         endcase
     end
 			
@@ -402,9 +402,95 @@ module gbvga(
 			// VGA output is not in blanking. Output data.
 
 			// There is valid GB data. Display framebuffer contents
-			r <= data_now[3:2];
-			g <= data_now[3:2];
-			b <= data_now[3:2];
+			case(data_now)
+				0: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b00;
+				end
+				1: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b00;
+				end
+
+				2: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b01;
+				end
+				3: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b01;
+				end
+
+				4: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b10;
+				end
+				5: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b10;
+				end
+				
+				6: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b11;
+				end
+				7: begin
+					r <= 2'b00;
+					g <= 2'b00;
+					b <= 2'b11;
+				end
+				
+				8: begin
+					r <= 2'b00;
+					g <= 2'b01;
+					b <= 2'b11;
+				end
+				9: begin
+					r <= 2'b00;
+					g <= 2'b01;
+					b <= 2'b11;
+				end
+
+				10: begin
+					r <= 2'b00;
+					g <= 2'b10;
+					b <= 2'b11;
+				end
+				11: begin
+					r <= 2'b00;
+					g <= 2'b10;
+					b <= 2'b11;
+				end
+
+				12: begin
+					r <= 2'b00;
+					g <= 2'b11;
+					b <= 2'b11;
+				end
+				13: begin
+					r <= 2'b00;
+					g <= 2'b11;
+					b <= 2'b11;
+				end
+				
+				14: begin
+					r <= 2'b01;
+					g <= 2'b11;
+					b <= 2'b11;
+				end
+				15: begin
+					r <= 2'b01;
+					g <= 2'b11;
+					b <= 2'b11;
+				end
+			endcase
 		end else begin
 			// VGA output is in blanking. Display black.
 			r <= 2'b00;
