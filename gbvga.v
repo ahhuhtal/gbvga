@@ -2,9 +2,9 @@ module gbvga(
 	input clk,
 	output vsync,
 	output hsync,
-	output reg[1:0] r,
-	output reg[1:0] g,
-	output reg[1:0] b,
+	output reg[3:0] r,
+	output reg[3:0] g,
+	output reg[3:0] b,
 	input[1:0] idata,
 	input ihsync,
 	input ivsync,
@@ -402,100 +402,14 @@ module gbvga(
 			// VGA output is not in blanking. Output data.
 
 			// There is valid GB data. Display framebuffer contents
-			case(data_now)
-				0: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b00;
-				end
-				1: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b00;
-				end
-
-				2: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b01;
-				end
-				3: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b01;
-				end
-
-				4: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b10;
-				end
-				5: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b10;
-				end
-				
-				6: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b11;
-				end
-				7: begin
-					r <= 2'b00;
-					g <= 2'b00;
-					b <= 2'b11;
-				end
-				
-				8: begin
-					r <= 2'b00;
-					g <= 2'b01;
-					b <= 2'b11;
-				end
-				9: begin
-					r <= 2'b00;
-					g <= 2'b01;
-					b <= 2'b11;
-				end
-
-				10: begin
-					r <= 2'b00;
-					g <= 2'b10;
-					b <= 2'b11;
-				end
-				11: begin
-					r <= 2'b00;
-					g <= 2'b10;
-					b <= 2'b11;
-				end
-
-				12: begin
-					r <= 2'b00;
-					g <= 2'b11;
-					b <= 2'b11;
-				end
-				13: begin
-					r <= 2'b00;
-					g <= 2'b11;
-					b <= 2'b11;
-				end
-				
-				14: begin
-					r <= 2'b01;
-					g <= 2'b11;
-					b <= 2'b11;
-				end
-				15: begin
-					r <= 2'b01;
-					g <= 2'b11;
-					b <= 2'b11;
-				end
-			endcase
+			r <= data_now;
+			g <= data_now;
+			b <= data_now;
 		end else begin
 			// VGA output is in blanking. Display black.
-			r <= 2'b00;
-			g <= 2'b00;
-			b <= 2'b00;
+			r <= 4'b0000;
+			g <= 4'b0000;
+			b <= 4'b0000;
 		end
 	end
 endmodule

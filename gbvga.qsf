@@ -53,12 +53,12 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_location_assignment PIN_T2 -to clk
 set_location_assignment PIN_R1 -to vsync
 set_location_assignment PIN_R2 -to hsync
-set_location_assignment PIN_P1 -to r[1]
-set_location_assignment PIN_P2 -to r[0]
-set_location_assignment PIN_N1 -to g[1]
-set_location_assignment PIN_N2 -to g[0]
-set_location_assignment PIN_M1 -to b[1]
-set_location_assignment PIN_M2 -to b[0]
+set_location_assignment PIN_N1 -to r[1]
+set_location_assignment PIN_N2 -to r[0]
+set_location_assignment PIN_J1 -to g[1]
+set_location_assignment PIN_J2 -to g[0]
+set_location_assignment PIN_F1 -to b[1]
+set_location_assignment PIN_F2 -to b[0]
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
 set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_global_assignment -name QIP_FILE framebuffer.qip
@@ -77,4 +77,10 @@ set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
 set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_location_assignment PIN_P1 -to r[3]
+set_location_assignment PIN_P2 -to r[2]
+set_location_assignment PIN_M1 -to g[3]
+set_location_assignment PIN_M2 -to g[2]
+set_location_assignment PIN_H1 -to b[3]
+set_location_assignment PIN_H2 -to b[2]
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
