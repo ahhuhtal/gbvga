@@ -10,30 +10,17 @@ module gbvga(
 	input ivsync,
 	input iclk);
 
-	// clock output from the PLL
-	wire pllclk;
-	
-	// instantiate the PLL to generate
-	// a 40 MHz output clock: pllclk
-	// from a
-	// 50 MHz input clock: clk
-
-	pll pll_inst(
-		.inclk0(clk),
-		.c0(pllclk)
-	);
-	
 	// VGA output variables
 	
-	// params for 640x576 following 800x600 timings @ 40 MHz
+	// params for 640x576 following 800x600 @ 72 Hz timings @ 50 MHz
 	localparam h_vis = 640; // visible area horizontal pixels
-	localparam h_fp = 120; // horizontal front porch pixels
-	localparam h_sync = 128; // horizontal sync active pixels
-	localparam h_bp = 168; // horizontal back porch pixels
+	localparam h_fp = 136; // horizontal front porch pixels
+	localparam h_sync = 120; // horizontal sync active pixels
+	localparam h_bp = 144; // horizontal back porch pixels
 
 	localparam v_vis = 576; // visible area vertical pixels
-	localparam v_fp = 13; // vertical front porch pixels
-	localparam v_sync = 4; // vertical sync active pixels
+	localparam v_fp = 49; // vertical front porch pixels
+	localparam v_sync = 6; // vertical sync active pixels
 	localparam v_bp = 35; // vertical back porch pixels
 
 
@@ -135,9 +122,9 @@ module gbvga(
 	// 2-port RAM instantiation for framebuffer
 
 	framebuffer framebuffer_inst (
-		.clock(pllclk), // a single clock is used for both ports
+		.clock(clk), // a single clock is used for both ports
 		.address_a(opixel_next2), // port A used by VGA output
-        .data_a(4'b1111), // write white data if display is blanked
+      .data_a(4'b1111), // write white data if display is blanked
 		.wren_a(blank), // VGA output does not write
 		.q_a(data_next1), // VGA output data
 
@@ -147,7 +134,7 @@ module gbvga(
 		.q_b(idata_oldstate)
 	);
 		
-	always @(posedge pllclk) begin
+	always @(posedge clk) begin
 		// VGA signal generation
 		
 		if(hcounter_next2 < h_vis + h_fp + h_sync + h_bp - 1) begin
